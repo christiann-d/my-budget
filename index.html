@@ -113,14 +113,6 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .monthrow button{width:30px;height:30px;border-radius:50%;border:1px solid var(--hair);background:none;padding:0;font-size:17px;line-height:1;color:var(--ink)}
 .monthrow button:disabled{opacity:.3}
 .monthrow .eyebrow{margin-right:auto}
-.dots{display:grid;grid-template-columns:repeat(7,1fr);gap:7px 0;margin-top:var(--s5);justify-items:center}
-.dots .wd{font-size:10.5px;font-weight:600;color:var(--ink3);letter-spacing:.08em;padding-bottom:2px}
-.dots .wd.on{color:var(--accent)}
-.dots i{width:min(11vw,40px);height:min(11vw,40px);border-radius:50%;display:block}
-.dots i.sp{background:var(--ink)} .dots i.no{border:1.5px solid var(--ink3)} .dots i.td{background:var(--accent)} .dots i.fu{background:var(--panel2)} .dots i.x{visibility:hidden}
-.key{display:flex;gap:var(--s4);margin-top:var(--s3);font-size:var(--t-xs);color:var(--ink2);flex-wrap:wrap}
-.key span{display:inline-flex;align-items:center;gap:6px}
-.key i{width:9px;height:9px;border-radius:50%;display:inline-block}
 
 .stackc{display:flex;flex-direction:column}
 .cc{position:relative;border-radius:var(--r);padding:20px 20px 44px;margin-bottom:-26px;color:var(--on-color);scroll-margin:120px}
@@ -305,15 +297,6 @@ function goalSaved(g, last){ let v = sum(g.src || [], id => +((last && last.b[id
 const CC = ['--c1','--c2','--c3','--c4','--c5','--c6','--c7'];
 const catColor = id => { const i = allCats().findIndex(c => c.id === id); return 'var(' + CC[(i < 0 ? 3 : i) % CC.length] + ')'; };
 const big = (t, inset, cls) => '<div class="big' + (cls ? ' ' + cls : '') + '" style="font-size:min(var(--t-hero),calc((min(100vw,620px) - ' + inset + 'px) / ' + (t.length*0.57).toFixed(2) + '))">' + t + '</div>';
-function dotCal(y, m){
-  const dim = new Date(y, m, 0).getDate(), first = (new Date(y, m-1, 1).getDay() + 6) % 7, ym = y + '-' + pad(m), today = iso(now), by = {};
-  E().forEach(e => { if (e.d.indexOf(ym) === 0) by[e.d] = (by[e.d] || 0) + e.a; });
-  const tw = ym === curYM ? (now.getDay() + 6) % 7 : -1;
-  let h = '<div class="dots" role="img" aria-label="Days this month with a logged spend">' + ['M','T','W','T','F','S','S'].map((d,i) => '<span class="wd' + (i === tw ? ' on' : '') + '">' + d + '</span>').join('');
-  for (let i = 0; i < first; i++) h += '<i class="x"></i>';
-  for (let d = 1; d <= dim; d++){ const k = ym + '-' + pad(d), cls = k === today ? 'td' : k > today ? 'fu' : by[k] ? 'sp' : 'no'; h += '<i class="' + cls + '" title="' + d + ' ' + MONTHS[m-1].slice(0,3) + (by[k] ? ': ' + money(by[k]) : '') + '"></i>'; }
-  return h + '</div><div class="key"><span><i style="background:var(--ink)"></i>Spent</span><span><i style="border:1.5px solid var(--ink3)"></i>No-spend day</span><span><i style="background:var(--accent)"></i>Today</span></div>';
-}
 const acc = (id, title, meta, body) => '<details class="card glass" data-acc="' + id + '"' + (openAcc[id] ? ' open' : '') + '><summary>' + title + (meta ? '<span class="meta">' + meta + '</span>' : '') + '</summary>' + body + '</details>';
 
 /* ---------- screens ---------- */
@@ -329,7 +312,7 @@ function vHome(){
   let perDay = '';
   if (viewYM === curYM && left > 0){ const dim = new Date(y, m, 0).getDate(); perDay = '. About ' + money0(left/(dim - now.getDate() + 1)) + ' a day from here'; }
   let h = '<section class="hero"><div class="monthrow"><span class="eyebrow">' + MONTHS[m-1] + ' ' + y + '</span><button data-act="prev" aria-label="Previous month">‹</button><button data-act="next" aria-label="Next month"' + (viewYM >= curYM ? ' disabled' : '') + '>›</button></div>' +
-    big(money0(left), 40, left < 0 ? 'neg' : '') + '<div class="row" style="align-items:flex-start"><p class="hint">' + money0(spent) + ' spent of ' + money0(planned) + perDay + '</p><span class="pill ' + tr[0] + '">' + tr[1] + '</span></div>' + dotCal(y, m) + '</section>';
+    big(money0(left), 40, left < 0 ? 'neg' : '') + '<div class="row" style="align-items:flex-start"><p class="hint">' + money0(spent) + ' spent of ' + money0(planned) + perDay + '</p><span class="pill ' + tr[0] + '">' + tr[1] + '</span></div></section>';
   h += '<section class="stackc" aria-label="Everyday spending">' + p.cats.map((c,i) => {
     const s = spentIn(c.id, viewYM), r = c.amt ? s/c.amt : (s > 0 ? 2 : 0), st = status(r);
     return '<div class="cc" id="x-cat-' + esc(c.id) + '" style="background:' + catColor(c.id) + ';z-index:' + (i+1) + '"><div class="row" style="align-items:flex-end"><div><div class="lab">' + money0(Math.max(c.amt - s, 0)) + ' left</div><div class="nm">' + esc(c.name) + (st !== 'good' ? '<span class="tag">' + WORD[st] + '</span>' : '') + '</div></div><div style="text-align:right"><div class="amt">' + money0(s) + '</div><div class="of">of ' + money0(c.amt) + '</div></div></div>' + bar(r) + '</div>';
